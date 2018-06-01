@@ -1,11 +1,19 @@
 import Expo from 'expo';
 import React from 'react';
 import { StyleSheet, Text, View, TextInput, Alert } from 'react-native';
+import { Router, Stack, Scene, Actions } from 'react-native-router-flux';
+import Home from './Home';
+import Word from './Word';
+import GameSetup from './GameSetup';
 
 // Assign userAgent to react-native before import socket.io-client
-// window.navigator.userAgent = 'react-native';
+window.navigator.userAgent = 'react-native';
+
 // import io from 'socket.io-client/dist/socket.io';
-const io = require('socket.io-client');
+import io from 'socket.io-client';
+const socket = io('http://10.32.5.219:3001', {
+  transports: ['websocket'],
+})
 
 
 /* Home Screen (App) */
@@ -15,112 +23,193 @@ export default class App extends React.Component {
     super();
     this.state = {
 
+      // game state
+      playerReady: false,
+      opponentReady: false,
+      round: 1,
+      playerWord: '',
+      opponentWord: '',
+
       // player names
       playerName: '',
       opponentName: '',
 
+      // scores
+      playerScore: 0,
+      opponentScore: 0,
+
       // sockets
+      ip: 'http://10.32.5.219:3001',
       playerConnected: false,
       opponentConnected: false,
 
-      // the players word choice
-      word: '',
-
       // for styling, etc
-      myClasses: [styles.beans, styles.cool]
+      myClasses: null
 
     }
 
     // setup socket.io-client
-    // this.socket = io('http://10.32.5.219:8080', {jsonp: false});
+    this.socket = io(this.state.ip, {jsonp: false});
   }
+
+
+  //////////////////////////////
+  // COMPONENT DID MOUNT
+  //////////////////////////////
 
   componentDidMount() {
 
-    this.input.focus();
-    
-    const socket = io('http://10.32.5.219:3000', {
-      transports: ['websocket'],
-    })
+    // We are connected now
+    socket.on('connect', () => {
 
-    socket.on('connect', ()=> {
-      this.setState({
-        isConnected: true
-      })
+        // do something now that we're connected
     })
 
   }
 
-  _onSubmit() {
 
-    // Alert.alert('sup');
+  //////////////////////////////
+  // JOIN GAME BUTTON
+  //////////////////////////////
 
-    fetch('http://10.32.5.219:3000/word', {
-      method: 'POST',
-      headers: {
-        Accept: 'application/json',
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        word: this.state.userWord
-      })
-    })
-    .then(response => {
-      if (response.status === "Not found") {
-        console.log(response);
-        Alert.alert('Invalid word')
-      } else {
-        console.log(response);
-        Alert.alert('Valid word')
+  _onJoinGame = (u) => {
+
+      if (u === '') {
+          Alert.alert('Please enter a nickname');
+          return;
       }
+
+      Actions.setup({ gameType: 'join', playerName: u })
+  }
+
+  
+  //////////////////////////////
+  // CREATE GAME BUTTON
+  //////////////////////////////
+
+  _onCreateGame = (u) => {
+
+      if (u === '') {
+          Alert.alert('Please enter a nickname');
+          return;
+      }
+
+      // CREATE A GAME OBJECT ON SERVER
+      // SEND A SOCKET EMIT HERE WITH NICKNAME FOR USER A
+
+      this.setState({
+          playerName: u
+      }, () => {
+          
+          socket.emit('create-game', { nickname: u })
+
+          socket.on('game-info', (data) => {
+
+            // Go to setup scene and pass in data from socket
+            Actions.setup({ 
+              gameType: 'new', 
+              playerName: u, 
+              game_id: data.game_id, 
+              gameRound: data.gameRound, 
+              user_a_score: data.user_a.score,
+              user_b_score: data.user_b.score,
+            });
+
+          })
+      })
+
+  }
+
+
+  //////////////////////////////
+  // SUBMIT GAME ID
+  //////////////////////////////
+
+  _onGameIdSubmit = (id, nickname) => {
+    
+    // Grab the game status being emitted by server
+    socket.on('game-status', (data) => {
+      
+      // If no game was found send a prop
+      if (data.found === undefined) {
+          Actions.refresh('setup', { game_found: false })
+
+      // Otherwise if the game was found emit the join game socket
+      // and push to the word selection screen
+      } else {
+          socket.emit('join-game', { game_id: id, nickname: nickname })
+          Actions.push('')
+      }
+      
+    });
+
+  }
+
+
+  //////////////////////////////
+  // SUBMIT A USERNAME
+  //////////////////////////////
+
+  _onUsernameSubmit = (u) => {
+    
+    // Set the player name based on what was submitted on 'Home' screen
+    // and then Action (navigate) to that screen with the new params
+    this.setState({
+      playerName: u
+    }, () => {
+      Actions.word({ playerName: u })
     })
-    .catch(error => {
-      console.log(error);
-    })
+
+  }
+
+
+  //////////////////////////////
+  // SUBMIT A WORD FOR X ROUND
+  //////////////////////////////
+
+  _onWordSubmit = () => {
 
   }
 
   render() {
+
     return (
-      <View style={styles.container}>
 
-        <Text>Player 1: {this.state.playerName} is connected: {this.state.playerConnected ? 'true' : 'false'}</Text>
-        <Text>Player 2: {this.state.opponentName} is connected: {this.state.opponentConnected ? 'true' : 'false'}</Text>
-        <Text>{this.state.userWord}</Text>
-        <Text style={this.state.myClasses}>This blows.</Text>
-        <TextInput 
-          style={styles.input} 
-          keyboardType="default" 
-          ref={(input) => { this.input = input }} 
-          onChange={(word) => this.setState({word})}  
-          //value={this.state.word} 
-          placeholder="Enter a word" 
-          onSubmitEditing={ () => this._onSubmit() } 
-          returnKeyType='done' />
+      <Router showNavigationBar={false}>
+        <Stack key="root">
 
-      </View>
+          {/* Main scenes/routes */}
+
+          <Scene key="home" headerMode="none" hideNavBar="true" title="Home" initial component={Home} 
+              _onUsernameSubmit={this._onUsernameSubmit} 
+              _onJoinGame={this._onJoinGame} 
+              _onCreateGame={this._onCreateGame} 
+              playerName={this.state.playerName} 
+              opponentName={this.state.opponentName} 
+              playerScore={this.state.playerScore} 
+              playerConnected={this.state.playerConnected} 
+              opponentScore={this.state.opponentScore} />
+
+          <Scene key="word" headerMode="none" hideNavBar="true" component={Word} 
+              onSubmit={this._onSubmit} 
+              round={this.state.round} 
+              playerName={this.state.playerName} 
+              opponentName={this.state.opponentName} 
+              playerScore={this.state.playerScore} 
+              opponentScore={this.state.opponentScore} 
+              playerConnected={this.state.playerConnected} 
+              opponentConnected={this.state.opponentConnected} />
+
+          <Scene key="setup" headerMode="none" hideNavBar="true" component={GameSetup} 
+                _onGameIdSubmit={this._onGameIdSubmit} 
+                playerName={this.state.playerName} 
+                opponentName={this.state.opponentName} />
+
+            {/* <Scene key="play" component={Play} /> */}
+
+        </Stack>
+      </Router>
+
     );
   }
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  input: {
-    padding: 16,
-    fontSize: 18,
-    borderWidth: 1,
-    borderColor: '#999999'
-  },
-  beans: {
-    textAlign: 'center',
-    fontSize: 24
-  },
-  cool: {
-    color: '#ff0000',
-  }
-});
