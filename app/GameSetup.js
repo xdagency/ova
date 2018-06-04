@@ -102,7 +102,7 @@ export default class GameSetup extends React.Component {
     }
 }
 
-const styles = {
+const styles = StyleSheet.create({
 
     // Layout
 
@@ -177,4 +177,4 @@ const styles = {
         marginBottom: 8,
         color: 'rgba(255,255,255,0.55)'
     }
-}
+})

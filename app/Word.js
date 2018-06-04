@@ -2,6 +2,7 @@ import Expo from 'expo';
 import React from 'react';
 import { StyleSheet, Text, View, TextInput, Alert, Button, StatusBar } from 'react-native';
 import { Action } from 'react-native-router-flux';
+import CountdownCircle from 'react-native-countdown-circle';
 
 export default class Word extends React.Component {
 
@@ -9,6 +10,7 @@ export default class Word extends React.Component {
         super();
         this.state = {
             word: '',
+            overlayClasses: [styles.overlay]
         }
     }
 
@@ -64,6 +66,11 @@ export default class Word extends React.Component {
                 {/* Top block, game state */}
                 <View style={styles.block}>
                     <Text style={styles.p__small}>Game ID: {this.props.game_id.toUpperCase()}</Text>
+                    {this.props.round > 1 ? (
+                        <Text style={[styles.p, styles.p__bold]}>Point {this.props.winner === 'a' ? this.props.user_a_name : this.props.user_b_name}!</Text>
+                    ) : (
+                        null
+                    )}
                     {/* 
                     <Text style={styles.p}>Your word: {this.state.word}</Text>
                     <Text style={styles.p__small}>Player 1: {this.props.user_a_name}</Text>
@@ -104,6 +111,24 @@ export default class Word extends React.Component {
                     </View>
                 </View>
 
+
+                {/* Winner overlay */}
+                {/*
+                <View style={this.state.overlayClasses}>
+                    
+                    <Text style={styles.p}>{this.props.winner === 'a' ? this.props.user_a_name : this.props.user_b_name} wins the point!</Text>
+                    <CountdownCircle
+                        seconds={3}
+                        radius={0}
+                        borderWidth={0}
+                        color="rgba(0,0,0,0)"
+                        bgColor="#f5c13c"
+                        textStyle={{ fontSize: 8, color: '#fff', fontFamily: 'Helvetica', fontWeight: 'bold' }}
+                        onTimeElapsed={() => this.setState({ overlayClasses: [styles.overlay__hidden] }) }
+                    />
+                </View>
+                */}
+
             </View>
 
         );
@@ -130,6 +155,22 @@ const styles = StyleSheet.create({
         flex: 2,
         justifyContent: 'flex-start',
         alignItems: 'stretch'
+    },
+    overlay: {
+        display: 'flex',
+        flex: 1,
+        alignItems: 'center',
+        justifyContent: 'center',
+        position: 'absolute',
+        top: 0,
+        right: 0,
+        left: 0,
+        bottom: 0,
+        padding: 24,
+        backgroundColor: '#009b7e'
+    },
+    overlay__hidden: {
+        display: 'none'
     },
 
     // Buttons
@@ -198,6 +239,9 @@ const styles = StyleSheet.create({
         fontSize: 18,
         color: '#202020',
         lineHeight: 24
+    },
+    p__bold: {
+        fontWeight: 'bold'
     },
     p__small: {
         fontSize: 12,

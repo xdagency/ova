@@ -6,6 +6,7 @@ import Home from './Home';
 import Word from './Word';
 import GameSetup from './GameSetup';
 import Play from './Play';
+import End from './End';
 
 // Assign userAgent to react-native before import socket.io-client
 window.navigator.userAgent = 'react-native';
@@ -63,6 +64,13 @@ export default class App extends React.Component {
 
   componentDidMount() {
 
+    // Set the letter counts for different rounds
+    // if (this.state.round === 3 || this.state.round === 4) { this.setState({ letterCount: 5 }) }
+    // if (this.state.round === 5 || this.state.round === 6) { this.setState({ letterCount: 6 }) }
+    // if (this.state.round === 7) { this.setState({ letterCount: 7 }) }
+    if (this.state.round === 2) { this.setState({ letterCount: 5 }) }
+    if (this.state.round === 3) { this.setState({ letterCount: 6 }) }
+
     // We are connected now
     socket.on('connect', () => {
     });
@@ -78,6 +86,44 @@ export default class App extends React.Component {
       })
 
     });
+
+
+    // When player B has joined player A's game
+    socket.on('game-status', (data) => {
+
+      console.log(data);
+
+      // If no status found, refresh setup page
+      if (data.game === "") {
+          Actions.refresh('setup', { found: false })
+
+      // Otherwise update state and push to Word Scene
+      } else {
+
+          this.setState({
+              user_a_name: data.user_a_name,
+              game_id: data.game_id,
+              // user_b_name: nickname
+          }, () => {
+            
+            // push to word Scene
+            Actions.push('word', {
+                ip: this.state.ip, 
+                game_id: this.state.game_id,
+                user_a_name: this.state.user_a_name, 
+                user_b_name: this.state.user_b_name, 
+                is_user_b: this.state.is_user_b,
+                round: this.state.round, 
+                user_a_score: this.state.user_a_score,
+                user_b_score: this.state.user_b_score,
+                letterCount: this.state.letterCount,
+                _onWordSubmit: this._onWordSubmit
+            });
+
+          }) // end setState
+      }
+
+  }); // end socket.on('game-status)
 
 
     // When both players have a word ready - start game
@@ -109,17 +155,30 @@ export default class App extends React.Component {
     // When a player guesses correctly
     socket.on('round-end', (data) => {
 
+        console.log('winner is', data.winner);
+        console.log('letter count now', this.state.letterCount);
+
         // Update state with new round #
         this.setState({
             round: data.round,
+            letterCount: data.letterCount,
             user_a_score: data.user_a_score,
             user_b_score: data.user_b_score
         }, () => {
+            // Actions.refresh({ key: 'play',
+            //     round: this.state.round, 
+            //     user_a_score: this.state.user_a_score, 
+            //     user_b_score: this.state.user_b_score,
+            //     letterCount: this.state.letterCount,
+            //     winner: data.winner
+            // });
             Actions.pop({ refresh: { 
                 round: this.state.round, 
+                letterCount: this.state.letterCount,
                 user_a_score: this.state.user_a_score, 
                 user_b_score: this.state.user_b_score,
-                letterCount: this.state.letterCount
+                letterCount: this.state.letterCount,
+                winner: data.winner
             } });
         })
     })
@@ -129,13 +188,14 @@ export default class App extends React.Component {
         Alert.alert('Not quite');
     })
 
-
-    // Set the letter counts for different rounds
-    // if (this.state.round === 3 || this.state.round === 4) { this.setState({ letterCount: 5 }) }
-    // if (this.state.round === 5 || this.state.round === 6) { this.setState({ letterCount: 6 }) }
-    // if (this.state.round === 7) { this.setState({ letterCount: 7 }) }
-    if (this.state.round === 2) { this.setState({ letterCount: 5 }) }
-    if (this.state.round === 3) { this.setState({ letterCount: 6 }) }
+    socket.on('game-end', (data) => {
+        Actions.push('end', {
+            user_a_name: this.state.user_a_name,
+            user_b_name: this.state.user_b_name,
+            user_a_score: data.game.user_a.score,
+            user_b_score: data.game.user_b.score
+        })
+    })
 
   }
 
@@ -225,44 +285,9 @@ export default class App extends React.Component {
 
         // Set state call back
         
+        let _id = id.toUpperCase();
         // Emit a join game
-        socket.emit('join-game', { game_id: id.toUpperCase(), nickname: nickname });
-
-        // get a game status back and...
-        socket.on('game-status', (data) => {
-
-            // console.log(data);
-
-            // If no status found, refresh setup page
-            if (data.game === "") {
-                Actions.refresh('setup', { found: false })
-
-            // Otherwise update state and push to Word Scene
-            } else {
-
-                this.setState({
-                    user_a_name: data.user_a_name,
-                    user_b_name: nickname
-                }, () => {
-                  
-                  // push to word Scene
-                  Actions.push('word', {
-                      ip: this.state.ip, 
-                      game_id: id,
-                      user_a_name: this.state.user_a_name, 
-                      user_b_name: this.state.user_b_name, 
-                      is_user_b: this.state.is_user_b,
-                      round: this.state.round, 
-                      user_a_score: this.state.user_a_score,
-                      user_b_score: this.state.user_b_score,
-                      letterCount: this.state.letterCount,
-                      _onWordSubmit: this._onWordSubmit 
-                  });
-
-                }) // end setState
-            }
-
-        }); // end socket.on('game-status)
+        socket.emit('join-game', { game_id: _id, nickname: nickname });
 
     }); // end setState
 
@@ -371,6 +396,8 @@ export default class App extends React.Component {
               opponentName={this.state.opponentName} />
 
           <Scene key="play" headerMode="none" hideNavBar="true" component={Play} />
+
+          <Scene key="end" headerMode="none" hideNavBar="true" component={End} />
 
         </Stack>
       </Router>

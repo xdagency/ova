@@ -34,6 +34,7 @@ export default class Home extends React.Component {
 
                 {/* Top block, game state */}
                 <View style={styles.block}>
+                    <Text>{this.props.winner !== '' ? this.props.winner : null}</Text>
                     <Text style={styles.p__small}>WORD</Text>
                     <Text style={[styles.p, styles.p__spread]}>
                         {this.props.is_user_a ? this.props.user_b_word.toUpperCase() : this.props.user_a_word.toUpperCase()}
@@ -90,7 +91,7 @@ export default class Home extends React.Component {
     }
 }
 
-const styles = {
+const styles = StyleSheet.create({
 
     // Layout
 
@@ -203,4 +204,4 @@ const styles = {
         marginBottom: 8,
         color: 'rgba(255,255,255,0.55)'
     }
-}
+})

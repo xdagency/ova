@@ -49,7 +49,8 @@ let words = [
     ['blue', 'game', 'moon', 'raid', 'food', 'stop', 'draw', 'slip', 'fork', 'rake', 'pull', 'push', 'bend'], // round 1
     ['mouth', 'bread', 'speed', 'float', 'blame', 'melon', 'total', 'break', 'smoke', 'alter', 'trait', 'drink', 'glass'], // round 2
     ['flower', 'figure', 'school', 'spirit', 'daring', 'useful', 'sprain', 'crunch', 'salmon', 'shrimp', 'savage', 'boiled', 'potato'], // round 3
-    ['useless', 'blaming', 'growing', 'octopus', 'freedom', 'carnage', 'achieve'] // round 4???
+    ['useless', 'blaming', 'sparrow', 'octopus', 'freedom', 'carnage', 'achieve', 'approve', 'charted', 'fulfill', 'handout', 'manager', 'scooter'], // round 4???
+    ['asterisk', 'comedian', 'footnote', 'identify', 'imperial', 'painting', 'scissors', 'friendly', 'standoff', 'threaten', 'unlocked', 'violence', 'zucchini']
 ];
 
 
@@ -139,9 +140,9 @@ io.on('connection', function(socket) {
 
         // Push this 'game' to the games array and assign all it's starting values
         games.push({ 
-            gameStatus: false,
             gameID: currGameID,
             gameRound: 1,
+            letterCount: 4,
             user_a: { s_id: socket.id, nickname: data.nickname, word: '', s_word: '', score: 0 },
             user_b: { s_id: '', nickname: '', word: '', s_word: '', score: 0 }
         })
@@ -159,7 +160,7 @@ io.on('connection', function(socket) {
         socket.emit('game-info', { game_id: currGameID, gameRound: 1, user_a: { score: 0 }, user_b: { score: 0 } });
 
         // Log the game that was just created 
-        console.log('Game created', games[currGameIndex]);
+        console.log('Game created - All games: \n', games);
         // Log the game index
         // console.log('Game Index', currGameIndex);
 
@@ -172,45 +173,42 @@ io.on('connection', function(socket) {
 
     socket.on('join-game', (data) => {
 
-        // Look for the right game ID
-        let foundGameIndex = '';
-        let foundGameID = '';
-        let searchGames = games.forEach((elem, i) => {
-            if(elem.gameID === data.game_id){
-                foundGameIndex = i;
-                foundGameID = elem.gameID;
-            }
+        // Find the correct game id
+        let theGame = games.find((elem) => {
+            return elem = elem.gameID === data.game_id;
         })
 
         // Log what we found
-        // console.log(foundGameID, foundGameIndex);
+        // console.log(theGame.gameID);
 
         // Send back what we found
         // Which is what we have in the 'game state' on server
         socket.emit('game-status', { 
-            game: games[foundGameIndex],
-            user_a_name: games[foundGameIndex].user_a.nickname
+            game: theGame,
+            game_id: theGame.gameID,
+            user_a_name: theGame.user_a.nickname
         });
 
         // Set the nickname and Socket ID of player B
         // only if we found a game ID based on what user B enetered on their end
-        if (foundGameID !== '') {
-            games[foundGameIndex].user_b.nickname = data.nickname;
-            games[foundGameIndex].user_b.s_id = socket.id;
+        if (theGame.gameID !== '') {
+            theGame.user_b.nickname = data.nickname;
+            theGame.user_b.s_id = socket.id;
             
             // Join the socket room
-            socket.join(foundGameID, () => {
+            socket.join(theGame.gameID, () => {
                 // console.log('socket', socket.id, 'has joined', socket.rooms)
                 // Emit user B's name back to player A
-                socket.to(foundGameID).emit('player-join', {
+                socket.to(theGame.gameID).emit('player-join', {
                     user_b_name: data.nickname
                 })
             });
 
-            // Emit user A's name back to player B?
+        // Emit user A's name back to player B?
         }
 
-        // console.log('Player B joined', games[foundGameIndex]);
+        console.log('player B joined', theGame);
+        // console.log('Player B joined', games[foundGameIndex_join]);
 
     })
 
@@ -220,16 +218,11 @@ io.on('connection', function(socket) {
     //////////////////////////////
 
     socket.on('submit-word', (data) => {
-        
-        // Look for the right game ID
-        let foundGameIndex = '';
-        let foundGameID = '';
-        let searchGames = games.forEach((elem, i) => {
-            if(elem.gameID == data.game_id) {
-                foundGameIndex = i;
-                foundGameID = elem.gameID;
-            }
-        });
+
+        // Find the correct game id
+        let theGame = games.find((elem) => {
+            return elem = elem.gameID === data.game_id;
+        })
 
         // Log the details found
         // console.log(foundGameID, foundGameIndex);
@@ -237,52 +230,31 @@ io.on('connection', function(socket) {
         // Scramble the word
         let s_word = wordscramble.scramble(data.word);
 
-        // console.log('Found game ID', foundGameID);
-        // console.log('Found game Index', foundGameIndex);
-        // console.log('User s_id', socket.id);
-        // console.log('Choosen word', data.word);
-        // console.log('Scrambled word', word_s);
-
-        // Somehow set the word to the respective user
-        if (games[foundGameIndex].user_a.s_id === socket.id) {
+        // Find the correct user to map word (and scrambled word) to
+        if (theGame.user_a.s_id === socket.id) {
 
             // User A
-            games[foundGameIndex].user_a.word = data.word;
-            games[foundGameIndex].user_a.s_word = s_word;
+            theGame.user_a.word = data.word;
+            theGame.user_a.s_word = s_word;
         } else {
 
             // User B
-            games[foundGameIndex].user_b.word = data.word;
-            games[foundGameIndex].user_b.s_word = s_word;
+            theGame.user_b.word = data.word;
+            theGame.user_b.s_word = s_word;
         }
 
-        console.log(games[foundGameIndex]);
+        console.log('word added:', theGame);
 
         // Check if both words have been submitted
         // If true, game can start
-        if (games[foundGameIndex].user_a.word !== '' && games[foundGameIndex].user_b.word !== '') {
+        if (theGame.user_a.word !== '' && theGame.user_b.word !== '') {
             
             // Emit to everyone in 'room'
-            // SHOULD I EMIT TO EACH PLAYER INDIVIDUALLY??
-            io.in(foundGameID).emit('game-start', {
-                game_id: foundGameID,
-                user_a_word: games[foundGameIndex].user_a.s_word,
-                user_b_word: games[foundGameIndex].user_b.s_word
+            io.in(theGame.gameID).emit('game-start', {
+                game_id: theGame.gameID,
+                user_a_word: theGame.user_a.s_word,
+                user_b_word: theGame.user_b.s_word
             });
-
-            // Emit user_a word to user_b && user_b word to user_a
-            // socket.to(games[foundGameIndex].user_b.s_id).emit('game-start', {
-            //     game_id: foundGameID,
-            //     you: 'user_b',
-            //     word: games[foundGameIndex].user_a.s_word
-            // });
-            
-            // socket.to(games[foundGameIndex].user_a.s_id).emit('game-start', {
-            //     game_id: foundGameID,
-            //     you: 'user_a',
-            //     word: games[foundGameIndex].user_b.s_word
-            // });
-
         }
 
     });
@@ -294,26 +266,25 @@ io.on('connection', function(socket) {
 
     socket.on('guess', (data) => {
 
-        // Look for the right game ID
-        let foundGameIndex = '';
-        let foundGameID = '';
-        let searchGames = games.forEach((elem, i) => {
-            if(elem.gameID == data.game_id) {
-                foundGameIndex = i;
-                foundGameID = elem.gameID;
-            }
-        });
+        // Find the correct game id
+        let theGameIndex = 0;
+        let theGame = games.find((elem, i) => {
+            theGameIndex = i;
+            return elem = elem.gameID === data.game_id;
+        })
+
+        console.log('Guess was made to gameIndex', theGameIndex);
 
         // check if it's correct
         // User A wins
-        if (data.user === 'a' && data.guess.toUpperCase() === games[foundGameIndex].user_b.word.toUpperCase()) {
+        if (data.user === 'a' && data.guess.toUpperCase() === theGame.user_b.word.toUpperCase()) {
 
-            updateGameState('a', foundGameID, foundGameIndex);
+            updateGameState('a', theGame.gameID, theGameIndex);
 
         // User B wins
-        } else if (data.user === 'b' && data.guess.toUpperCase() === games[foundGameIndex].user_a.word.toUpperCase()) {
+        } else if (data.user === 'b' && data.guess.toUpperCase() === theGame.user_a.word.toUpperCase()) {
 
-            updateGameState('b');
+            updateGameState('b', theGame.gameID, theGameIndex);
 
         } else {
             // Wrong guess
@@ -352,6 +323,9 @@ function updateGameState(u, id, i) {
     // increment user score
     u === 'a' ? games[i].user_a.score += 1 : games[i].user_b.score += 1;
 
+    // increment letterCount
+    games[i].letterCount += 1;
+
     // clear words
     games[i].user_a.word = '';
     games[i].user_a.s_word = '';
@@ -359,12 +333,19 @@ function updateGameState(u, id, i) {
     games[i].user_b.s_word = '';
 
     // emit the winner
-    io.in(id).emit('round-end', { 
-        round: games[i].gameRound,
-        user_a_score: games[i].user_a.score,
-        user_b_score: games[i].user_b.score,
-        winner: 'user_' + u 
-    });
+    if (games[i].user_a.score === 3 || games[i].user_b.score === 3) {
+        io.in(id).emit('game-over', {
+            game: games[i]
+        });
+    } else {
+        io.in(id).emit('round-end', { 
+            round: games[i].gameRound,
+            letterCount: games[i].letterCount,
+            user_a_score: games[i].user_a.score,
+            user_b_score: games[i].user_b.score,
+            winner: u
+        });
+    }
 
     console.log('game status:', games[i]);
 

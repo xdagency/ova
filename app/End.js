@@ -2,7 +2,7 @@ import Expo from 'expo';
 import React from 'react';
 import { StyleSheet, Text, View, TextInput, Alert, Button, StatusBar } from 'react-native';
 
-export default class Home extends React.Component {
+export default class End extends React.Component {
 
     constructor() {
         super();
@@ -23,27 +23,14 @@ export default class Home extends React.Component {
         return (
             <View style={styles.container}>
 
-                {/* Top block, app title */}
-                <View style={styles.block}>
-                    <Text style={styles.heading}>Ova</Text>
-                </View>
-
                 {/* Bottom block, username selection */}
-                <View style={[styles.block, styles.block__top]}>
+                <View style={[styles.block]}>
                     <View style={styles.form}>
-                        <Text style={styles.label}>Username</Text>
-                        <TextInput 
-                            style={styles.input} 
-                            keyboardType="default" 
-                            maxLength={10} 
-                            returnKeyType="done" 
-                            onChangeText={ (text) => this.setState({ username: text }) } 
-                            // onSubmitEditing={ () => this.props._onUsernameSubmit(this.state.username) } 
-                            placeholder="Enter a username" />
-                    </View>
-                    <View style={styles.form}>
-                        <Button onPress={ () => { this.props._onJoinGame(this.state.username) }} title="Join Game" color="#f9f9f9" />
-                        <Button onPress={ () => { this.props._onCreateGame(this.state.username) }} title="Create New Game" color="#f9f9f9" />
+                        <Text style={styles.p}>Final Score</Text>
+                        <Text style={styles.p}>{this.props.user_a_name}</Text>
+                        <Text style={[styles.p, styles.p__big]}>{this.props.user_a_score}</Text>
+                        <Text style={styles.p}>{this.props.user_a_name}</Text>
+                        <Text style={[styles.p, styles.p__big]}>{this.props.user_a_score}</Text>
                     </View>
                 </View>
 
@@ -124,6 +111,12 @@ const styles = StyleSheet.create({
 
     // Typography 
 
+    p: {
+        fontSize: 18,
+        color: '#f9f9f9',
+        textAlign: 'center',
+        lineHeight: 24
+    },
     heading: {
         color: '#f9f9f9',
         fontFamily: 'Didot',
