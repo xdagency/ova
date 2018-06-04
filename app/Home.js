@@ -1,6 +1,6 @@
 import Expo from 'expo';
 import React from 'react';
-import { StyleSheet, Text, View, TextInput, Alert, Button } from 'react-native';
+import { StyleSheet, Text, View, TextInput, Alert, Button, StatusBar } from 'react-native';
 
 export default class Home extends React.Component {
 
@@ -11,7 +11,15 @@ export default class Home extends React.Component {
         }
     }
 
+    componentDidMount() {
+
+        // make status bar white
+        StatusBar.setBarStyle('light-content', true);
+
+    }
+
     render() {
+
         return (
             <View style={styles.container}>
 
@@ -33,33 +41,9 @@ export default class Home extends React.Component {
                             // onSubmitEditing={ () => this.props._onUsernameSubmit(this.state.username) } 
                             placeholder="Enter a username" />
                     </View>
-                    {/*<View style={styles.form}>
-                        <Text style={styles.label}>Join Game</Text>
-                        <TextInput 
-                            style={styles.input} 
-                            keyboardType="default" 
-                            returnKeyType="done" 
-                            onChangeText={ (text) => this.setState({ game_id: text }) } 
-                            onSubmitEditing={ () => this.props._onGameIdSubmit(this.state.game_id) } 
-                            placeholder="Enter a Game ID" /> 
-                    </View>*/}
                     <View style={styles.form}>
                         <Button onPress={ () => { this.props._onJoinGame(this.state.username) }} title="Join Game" color="#f9f9f9" />
                         <Button onPress={ () => { this.props._onCreateGame(this.state.username) }} title="Create New Game" color="#f9f9f9" />
-                    </View>
-                </View>
-                
-                <View style={styles.round}>
-                    <Text style={styles.round__text}>ROUND {this.props.round}</Text>
-                </View>
-                <View style={styles.scores}>
-                    <View style={styles.scoreDetails}>
-                        <Text style={styles.scoreDetails__heading}>YOU</Text>
-                        <Text style={styles.scoreDetails__score}>{this.props.playerScore}</Text>
-                    </View>
-                    <View style={styles.scoreDetails}>
-                        <Text style={[styles.scoreDetails__heading, styles.scoreDetails__right]}>OPPONENT</Text>
-                        <Text style={[styles.scoreDetails__score, styles.scoreDetails__right]}>{this.props.opponentScore}</Text>
                     </View>
                 </View>
 
@@ -142,7 +126,13 @@ const styles = {
 
     heading: {
         color: '#f9f9f9',
-        fontSize: 44
+        fontFamily: 'Didot',
+        // fontWeight: 'bold',
+        fontSize: 44,
+        shadowOffset: { width: 0, height: 12 },
+        shadowColor: '#000000',
+        shadowOpacity: 0.3,
+        shadowRadius: 5
     },
     label: {
         fontSize: 18,

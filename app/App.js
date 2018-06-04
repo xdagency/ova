@@ -5,6 +5,7 @@ import { Router, Stack, Scene, Actions } from 'react-native-router-flux';
 import Home from './Home';
 import Word from './Word';
 import GameSetup from './GameSetup';
+import Play from './Play';
 
 // Assign userAgent to react-native before import socket.io-client
 window.navigator.userAgent = 'react-native';
@@ -27,16 +28,19 @@ export default class App extends React.Component {
       playerReady: false,
       opponentReady: false,
       round: 1,
-      playerWord: '',
-      opponentWord: '',
+      letterCount: 4,
+      user_a_word: '',
+      user_b_word: '',
 
-      // player names
-      playerName: '',
-      opponentName: '',
+      // player names & state
+      user_a_name: '',
+      user_b_name: '',
+      is_user_a: false,
+      is_user_b: false,
 
       // scores
-      playerScore: 0,
-      opponentScore: 0,
+      user_a_score: 0,
+      user_b_score: 0,
 
       // sockets
       ip: 'http://10.32.5.219:3001',
@@ -61,9 +65,77 @@ export default class App extends React.Component {
 
     // We are connected now
     socket.on('connect', () => {
+    });
 
-        // do something now that we're connected
+
+    // When user B joins, send their name to Word Scene for user A
+    socket.on('player-join', (data) => {
+      
+      this.setState({
+          user_b_name: data.user_b_name
+      }, () => {
+          Actions.refresh({ key: 'word', user_b_name: this.state.user_b_name });
+      })
+
+    });
+
+
+    // When both players have a word ready - start game
+    // Push both players to the 'Play' scene which will countdown and have players start to make guesses
+    socket.on('game-start', (data) => {
+
+        console.log('Game start fired');
+
+        Actions.push('play', {
+            ip: this.state.ip,
+            _onGuessSubmit: this._onGuessSubmit,
+            game_id: data.game_id,
+            round: this.state.round,
+            letterCount: this.state.letterCount,
+            user_a_name: this.state.user_a_name,
+            user_b_name: this.state.user_b_name,
+            is_user_a: this.state.is_user_a,
+            is_user_b: this.state.is_user_b,
+            user_a_score: this.state.user_a_score,
+            user_b_score: this.state.user_b_score,
+            user_a_word: data.user_a_word,
+            user_b_word: data.user_b_word
+        })
+
+        // console.log(data.user_a_word, data.user_b_word);
     })
+
+
+    // When a player guesses correctly
+    socket.on('round-end', (data) => {
+
+        // Update state with new round #
+        this.setState({
+            round: data.round,
+            user_a_score: data.user_a_score,
+            user_b_score: data.user_b_score
+        }, () => {
+            Actions.pop({ refresh: { 
+                round: this.state.round, 
+                user_a_score: this.state.user_a_score, 
+                user_b_score: this.state.user_b_score,
+                letterCount: this.state.letterCount
+            } });
+        })
+    })
+
+    // Incorrect guess
+    socket.on('wrong', () => {
+        Alert.alert('Not quite');
+    })
+
+
+    // Set the letter counts for different rounds
+    // if (this.state.round === 3 || this.state.round === 4) { this.setState({ letterCount: 5 }) }
+    // if (this.state.round === 5 || this.state.round === 6) { this.setState({ letterCount: 6 }) }
+    // if (this.state.round === 7) { this.setState({ letterCount: 7 }) }
+    if (this.state.round === 2) { this.setState({ letterCount: 5 }) }
+    if (this.state.round === 3) { this.setState({ letterCount: 6 }) }
 
   }
 
@@ -79,7 +151,19 @@ export default class App extends React.Component {
           return;
       }
 
-      Actions.setup({ gameType: 'join', playerName: u })
+      // If user is joining, we know they are user B
+      // So we set user b details
+      this.setState({
+          user_b_name: u,
+          is_user_b: true
+      }, () => {
+        Actions.setup({
+            gameType: 'join', 
+            ip: this.state.ip,
+            user_b_name: this.state.user_b_name, 
+            is_user_b: this.state.is_user_b
+        })
+      })
   }
 
   
@@ -98,21 +182,29 @@ export default class App extends React.Component {
       // SEND A SOCKET EMIT HERE WITH NICKNAME FOR USER A
 
       this.setState({
-          playerName: u
+        user_a_name: u,
+        is_user_a: true
       }, () => {
           
+          // Send an emit to server to create a game object in 'games' array
           socket.emit('create-game', { nickname: u })
 
+          // when server sends a 'game-info' emit...
           socket.on('game-info', (data) => {
 
             // Go to setup scene and pass in data from socket
             Actions.setup({ 
-              gameType: 'new', 
-              playerName: u, 
+              gameType: 'new',
+              ip: this.state.ip,  
+              user_a_name: this.state.user_a_name, 
+              user_b_name: this.state.user_b_name,
+              is_user_a: this.state.is_user_a,
               game_id: data.game_id, 
-              gameRound: data.gameRound, 
+              round: data.gameRound, 
               user_a_score: data.user_a.score,
               user_b_score: data.user_b.score,
+              letterCount: this.state.letterCount,
+              _onWordSubmit: this._onWordSubmit
             });
 
           })
@@ -122,54 +214,133 @@ export default class App extends React.Component {
 
 
   //////////////////////////////
-  // SUBMIT GAME ID
+  // SUBMIT GAME ID (i.e. Joing a Game)
   //////////////////////////////
 
   _onGameIdSubmit = (id, nickname) => {
-    
-    // Grab the game status being emitted by server
-    socket.on('game-status', (data) => {
-      
-      // If no game was found send a prop
-      if (data.found === undefined) {
-          Actions.refresh('setup', { game_found: false })
 
-      // Otherwise if the game was found emit the join game socket
-      // and push to the word selection screen
-      } else {
-          socket.emit('join-game', { game_id: id, nickname: nickname })
-          Actions.push('')
-      }
-      
-    });
+    this.setState({
+        user_b_name: nickname
+    }, () => {
+
+        // Set state call back
+        
+        // Emit a join game
+        socket.emit('join-game', { game_id: id.toUpperCase(), nickname: nickname });
+
+        // get a game status back and...
+        socket.on('game-status', (data) => {
+
+            // console.log(data);
+
+            // If no status found, refresh setup page
+            if (data.game === "") {
+                Actions.refresh('setup', { found: false })
+
+            // Otherwise update state and push to Word Scene
+            } else {
+
+                this.setState({
+                    user_a_name: data.user_a_name,
+                    user_b_name: nickname
+                }, () => {
+                  
+                  // push to word Scene
+                  Actions.push('word', {
+                      ip: this.state.ip, 
+                      game_id: id,
+                      user_a_name: this.state.user_a_name, 
+                      user_b_name: this.state.user_b_name, 
+                      is_user_b: this.state.is_user_b,
+                      round: this.state.round, 
+                      user_a_score: this.state.user_a_score,
+                      user_b_score: this.state.user_b_score,
+                      letterCount: this.state.letterCount,
+                      _onWordSubmit: this._onWordSubmit 
+                  });
+
+                }) // end setState
+            }
+
+        }); // end socket.on('game-status)
+
+    }); // end setState
 
   }
 
 
   //////////////////////////////
-  // SUBMIT A USERNAME
+  // SUBMIT WORD
   //////////////////////////////
 
-  _onUsernameSubmit = (u) => {
-    
-    // Set the player name based on what was submitted on 'Home' screen
-    // and then Action (navigate) to that screen with the new params
-    this.setState({
-      playerName: u
-    }, () => {
-      Actions.word({ playerName: u })
+  _onWordSubmit = (id, w) => {
+
+    // Make sure word long enough
+    if (w.length < this.state.letterCount) {
+        Alert.alert('Gotta pick a longer word');
+        return;
+    }
+
+    // Hit server at the /word endpoint
+    fetch(this.state.ip + '/word', {
+        // POST request
+        method: 'POST',
+        headers: {
+            Accept: 'application/json',
+            'Content-Type': 'application/json'
+        },
+        // send the word the user is guessing
+        body: JSON.stringify({
+            word: w
+        })
+      })
+
+      .then(response => {
+          // if the word came back from dictionary API as not found
+          // give an error and make them keep guessing
+          if (response.status === 404) {
+              // console.log(response);
+              Alert.alert('Hey that\'s not a word, try again');
+          
+          // Otherwise set the word as their word for the game
+          } else {
+              // console.log(response);
+              Alert.alert('Valid word', w);
+
+              // Convert game ID to upper case to avoid matching errors on server
+              let _id = id.toUpperCase();
+              socket.emit('submit-word', { game_id: _id, word: w })
+          }
+      })
+
+      .catch(error => {
+          console.log(error);
+      });
+
+  }
+
+
+  //////////////////////////////
+  // WORD GUESS
+  //////////////////////////////
+
+  _onGuessSubmit = (id, w, u) => {
+
+    let _id = id.toUpperCase();
+
+    // console.log(id, w, u);
+
+    socket.emit('guess', {
+        game_id: _id,
+        guess: w,
+        user: u
     })
 
   }
 
 
-  //////////////////////////////
-  // SUBMIT A WORD FOR X ROUND
-  //////////////////////////////
-
-  _onWordSubmit = () => {
-
-  }
+  
+  ///// RENDER /////
 
   render() {
 
@@ -191,21 +362,15 @@ export default class App extends React.Component {
               opponentScore={this.state.opponentScore} />
 
           <Scene key="word" headerMode="none" hideNavBar="true" component={Word} 
-              onSubmit={this._onSubmit} 
-              round={this.state.round} 
-              playerName={this.state.playerName} 
-              opponentName={this.state.opponentName} 
-              playerScore={this.state.playerScore} 
-              opponentScore={this.state.opponentScore} 
-              playerConnected={this.state.playerConnected} 
-              opponentConnected={this.state.opponentConnected} />
+              _onWordSubmit={this._onWordSubmit} 
+              round={this.state.round} />
 
           <Scene key="setup" headerMode="none" hideNavBar="true" component={GameSetup} 
-                _onGameIdSubmit={this._onGameIdSubmit} 
-                playerName={this.state.playerName} 
-                opponentName={this.state.opponentName} />
+              _onGameIdSubmit={this._onGameIdSubmit} 
+              playerName={this.state.playerName} 
+              opponentName={this.state.opponentName} />
 
-            {/* <Scene key="play" component={Play} /> */}
+          <Scene key="play" headerMode="none" hideNavBar="true" component={Play} />
 
         </Stack>
       </Router>
