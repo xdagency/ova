@@ -13,7 +13,7 @@ window.navigator.userAgent = 'react-native';
 
 // import io from 'socket.io-client/dist/socket.io';
 import io from 'socket.io-client';
-const socket = io('http://10.32.5.219:3001', {
+const socket = io('http://192.168.0.14:3001', {
   transports: ['websocket'],
 })
 
@@ -44,7 +44,7 @@ export default class App extends React.Component {
       user_b_score: 0,
 
       // sockets
-      ip: 'http://10.32.5.219:3001',
+      ip: 'http://192.168.0.14:3001',
       playerConnected: false,
       opponentConnected: false,
 
@@ -188,8 +188,9 @@ export default class App extends React.Component {
         Alert.alert('Not quite');
     })
 
-    socket.on('game-end', (data) => {
-        Actions.push('end', {
+    socket.on('game-over', (data) => {
+        console.log('game over', data);
+        Actions.end({
             user_a_name: this.state.user_a_name,
             user_b_name: this.state.user_b_name,
             user_a_score: data.game.user_a.score,
@@ -330,7 +331,7 @@ export default class App extends React.Component {
           // Otherwise set the word as their word for the game
           } else {
               // console.log(response);
-              Alert.alert('Valid word', w);
+              Alert.alert('Valid word', 'Your word will be: ' + w);
 
               // Convert game ID to upper case to avoid matching errors on server
               let _id = id.toUpperCase();

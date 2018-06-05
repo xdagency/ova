@@ -18,20 +18,28 @@ export default class End extends React.Component {
 
     }
 
+    _newGame = () => {
+
+    }
+
     render() {
 
         return (
             <View style={styles.container}>
 
+                <View style={styles.block}>
+                    <Text style={styles.heading}>Game Over</Text>
+                    <Text style={[styles.p]}>Final Score</Text>
+                </View>
+
                 {/* Bottom block, username selection */}
-                <View style={[styles.block]}>
-                    <View style={styles.form}>
-                        <Text style={styles.p}>Final Score</Text>
-                        <Text style={styles.p}>{this.props.user_a_name}</Text>
-                        <Text style={[styles.p, styles.p__big]}>{this.props.user_a_score}</Text>
-                        <Text style={styles.p}>{this.props.user_a_name}</Text>
-                        <Text style={[styles.p, styles.p__big]}>{this.props.user_a_score}</Text>
-                    </View>
+                <View style={[styles.block, styles.block__top]}>
+                    <Text style={styles.p}>{this.props.user_a_name}</Text>
+                    <Text style={[styles.p, styles.p__big, styles.p__space]}>{this.props.user_a_score}</Text>
+                    <Text style={styles.p}>{this.props.user_b_name}</Text>
+                    <Text style={[styles.p, styles.p__big, styles.p__space]}>{this.props.user_b_score}</Text>
+                    <View style={styles.p__space}></View>
+                    <Button title='New game' color='#f9f9f9' onPress={ () => { this._newGame() } } />
                 </View>
 
             </View>
@@ -61,54 +69,6 @@ const styles = StyleSheet.create({
         alignItems: 'stretch'
     },
 
-    // Scores 
-
-    round: {
-        padding: 6,
-        backgroundColor: '#c9c9c9'
-    },
-    round__text: {
-        fontSize: 12,
-        textAlign: 'center',
-        fontWeight: 'bold'
-    },
-    scores: {
-        paddingTop: 16, paddingBottom: 32, paddingLeft: 32, paddingRight: 32,
-        backgroundColor: '#dddddd',
-        flexDirection: 'row'
-    },
-    scoreDetails: {
-        flex: 1,
-        borderWidth: 0, borderColor: 'red'
-    },
-    scoreDetails__right: {
-        textAlign: 'right'
-    },
-    scoreDetails__heading: {
-        fontSize: 12,
-        paddingBottom: 8,
-        fontWeight: 'bold',
-    },
-    scoreDetails__score: {
-        fontSize: 24
-    },
-
-    // Forms
-
-    form: {
-        flex: 1,
-        marginBottom: 0,
-        borderWidth: 0, borderColor: 'red'
-    },
-    input: {
-        fontSize: 18,
-        textAlign: 'center',
-        borderBottomWidth: 1,
-        padding: 8,
-        color: 'rgba(255,255,255,0.9)',
-        borderBottomColor: 'rgba(255,255,255,0.25)'
-    },
-
     // Typography 
 
     p: {
@@ -116,6 +76,14 @@ const styles = StyleSheet.create({
         color: '#f9f9f9',
         textAlign: 'center',
         lineHeight: 24
+    },
+    p__big: {
+        fontSize: 32,
+        lineHeight: 38,
+        fontWeight: 'bold'
+    },
+    p__space: {
+        marginBottom: 16
     },
     heading: {
         color: '#f9f9f9',

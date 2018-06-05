@@ -124,6 +124,7 @@ app.get('/', (req, res) => {
 
 io.on('connection', function(socket) {
 
+    // a user has connected to a socket
     console.log('Socket connection made', socket.id);
 
     //////////////////////////////
@@ -149,19 +150,21 @@ io.on('connection', function(socket) {
 
         // the current game index will be the length of the array minus 1
         // since we just pushed the current game to end of array
+        // DEPRECATED
         currGameIndex = games.length - 1;
 
         // Join a socket room
+        // DEPRECATED (just to log when a user has joined a room)
         socket.join(currGameID, () => {
             // console.log('socket', socket.id, 'has joined', socket.rooms)
         });
 
-        // Send back the game ID to user A
+        // Send back the game ID to user A and some initial game values
         socket.emit('game-info', { game_id: currGameID, gameRound: 1, user_a: { score: 0 }, user_b: { score: 0 } });
 
         // Log the game that was just created 
-        console.log('Game created - All games: \n', games);
-        // Log the game index
+        // console.log('Game created - All games: \n', games);
+        console.log('Game created: \n', games[currGameIndex]);
         // console.log('Game Index', currGameIndex);
 
     });
@@ -173,14 +176,28 @@ io.on('connection', function(socket) {
 
     socket.on('join-game', (data) => {
 
+        console.log('data', data);
+
         // Find the correct game id
         let theGame = games.find((elem) => {
             return elem = elem.gameID === data.game_id;
         })
 
-        // Log what we found
-        // console.log(theGame.gameID);
 
+        // console.log('--------------------------');
+        // console.log('tried to find game with gameID', data.game_id);
+        // console.log('games look like'); console.log(games);
+        // console.log('--------------------------');
+        // // Log what we found
+        // console.log('join game id', theGame.gameID);
+
+
+        // Catch a socket trying to hit 'join-game' without a gameID
+        if (!data.game_id) {
+            console.log('Phantom', socket.id);
+            return;
+        }
+        
         // Send back what we found
         // Which is what we have in the 'game state' on server
         socket.emit('game-status', { 
@@ -204,13 +221,12 @@ io.on('connection', function(socket) {
                 })
             });
 
-        // Emit user A's name back to player B?
         }
 
         console.log('player B joined', theGame);
         // console.log('Player B joined', games[foundGameIndex_join]);
 
-    })
+    });
 
 
     //////////////////////////////
@@ -291,16 +307,16 @@ io.on('connection', function(socket) {
             socket.emit('wrong');
         }
 
-    })
+    });
 
 
     //////////////////////////////
-    // SEND USER THEIR S_ID
+    // SEND USER THEIR S_ID (Deprecated)
     //////////////////////////////
 
     socket.on('id-request', () => {
         socket.emit('id-answer', socket.id);
-    })
+    });
     
 
     //////////////////////////////
@@ -308,6 +324,7 @@ io.on('connection', function(socket) {
     //////////////////////////////
 
     socket.on('disconnect', function() {
+        // Log when a user has lost connection with their socket
         console.log('Client disconnected.', socket.id);
     });
 
@@ -315,6 +332,7 @@ io.on('connection', function(socket) {
 
 
 // Function for updating game state when a user gets a point
+// takes in the user (a or b), the game id, and the game index
 function updateGameState(u, id, i) {
     
     // increment round
