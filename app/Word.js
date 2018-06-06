@@ -1,4 +1,4 @@
-import Expo from 'expo';
+import { Expo, BlurView } from 'expo';
 import React from 'react';
 import { StyleSheet, Text, View, TextInput, Alert, Button, StatusBar } from 'react-native';
 import { Action } from 'react-native-router-flux';
@@ -16,12 +16,10 @@ export default class Word extends React.Component {
 
 
     //////////////////////////////
-    // COMPONENT DID MOUNT
+    // COMPONENT DID UPDATE
     //////////////////////////////
 
-    componentDidMount() {
-        
-        this.input.focus();
+    componentDidUpdate() {
 
         // make status bar black
         StatusBar.setBarStyle('dark-content', true);
@@ -51,6 +49,9 @@ export default class Word extends React.Component {
             this.setState({
                 word: responsejson
             })
+
+            // focus the input so user can press 'Done'
+            this.input.focus();
         })
         .catch(error => {
             console.log(error);
@@ -110,24 +111,23 @@ export default class Word extends React.Component {
                         <Text style={[styles.scoreDetails__score, styles.scoreDetails__right]}>{this.props.user_b_score}</Text>
                     </View>
                 </View>
-
-
-                {/* Winner overlay */}
-                {/*
-                <View style={this.state.overlayClasses}>
-                    
-                    <Text style={styles.p}>{this.props.winner === 'a' ? this.props.user_a_name : this.props.user_b_name} wins the point!</Text>
-                    <CountdownCircle
-                        seconds={3}
-                        radius={0}
-                        borderWidth={0}
-                        color="rgba(0,0,0,0)"
-                        bgColor="#f5c13c"
-                        textStyle={{ fontSize: 8, color: '#fff', fontFamily: 'Helvetica', fontWeight: 'bold' }}
-                        onTimeElapsed={() => this.setState({ overlayClasses: [styles.overlay__hidden] }) }
-                    />
+                
+                
+                {/* Word entered overlay */}
+                <View style={[styles.overlay, { display: this.props.displayOverlay }]}>
+                    <View style={styles.overlay__bg}></View>
+                    <View style={styles.overlay__text}>
+                        <Text style={[styles.p, styles.p__dark]}>{this.props.word} LOCKED IN</Text>
+                        <Text style={styles.p__small}>Waiting for other players</Text>
+                    </View>
                 </View>
-                */}
+
+                {/*<BlurView tint="dark" intensity={80} style={[StyleSheet.absoluteFill, { display: this.props.displayOverlay }]}>
+                    <View style={styles.overlay__text}>
+                        <Text style={[styles.p, styles.p__dark]}>{this.props.word} LOCKED IN</Text>
+                        <Text style={styles.p__small}>Waiting for other players</Text>
+                    </View>
+                </BlurView>*/}
 
             </View>
 
@@ -142,7 +142,7 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         flexDirection: 'column',
-        backgroundColor: '#f8f8f8'
+        backgroundColor: '#f8f8f8',
     },
     block: {
         flex: 1,
@@ -167,10 +167,31 @@ const styles = StyleSheet.create({
         left: 0,
         bottom: 0,
         padding: 24,
-        backgroundColor: '#009b7e'
+    },
+    overlay__bg: {
+        position: 'absolute',
+        top: 0,
+        right: 0,
+        left: 0,
+        bottom: 0,
+        backgroundColor: '#111111',
+        opacity: 0.5
     },
     overlay__hidden: {
         display: 'none'
+    },
+    overlay__text: {
+        backgroundColor: '#f9f9f9',
+        padding: 12,
+        paddingLeft: 16,
+        paddingRight: 16,
+        opacity: 1,
+        shadowOffset: { width: 0, height: 16 },
+        shadowColor: '#000000',
+        shadowOpacity: 0.155,
+        shadowRadius: 10,
+        elevation: 3,
+        borderRadius: 4
     },
 
     // Buttons
@@ -243,10 +264,15 @@ const styles = StyleSheet.create({
     p__bold: {
         fontWeight: 'bold'
     },
+    p__dark: {
+        color: '#202020',
+        textAlign: 'center'
+    },
     p__small: {
         fontSize: 12,
         color: '#AAAAAA',
-        lineHeight: 14
+        lineHeight: 14,
+        textAlign: 'center'
     }
 
 });

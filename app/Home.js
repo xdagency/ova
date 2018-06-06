@@ -1,4 +1,4 @@
-import Expo from 'expo';
+import { Expo, LinearGradient } from 'expo';
 import React from 'react';
 import { StyleSheet, Text, View, TextInput, Alert, Button, StatusBar } from 'react-native';
 
@@ -22,6 +22,12 @@ export default class Home extends React.Component {
 
         return (
             <View style={styles.container}>
+
+                <LinearGradient colors={['#f760ab', 'rgba(240,210,110, 0)']} start={[1,1]} end={[0.15,0.15]}
+                style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }} />
+
+                <LinearGradient colors={['#fdbb2d', 'rgba(253, 187, 45, 0)']} start={[1,0]} end={[0.2,0.88]}
+                style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }} />
 
                 {/* Top block, app title */}
                 <View style={styles.block}>
@@ -59,7 +65,7 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         flexDirection: 'column',
-        backgroundColor: '#126097'
+        backgroundColor: '#22c1c3'
     },
     block: {
         flex: 1,
@@ -131,8 +137,8 @@ const styles = StyleSheet.create({
         fontSize: 44,
         shadowOffset: { width: 0, height: 12 },
         shadowColor: '#000000',
-        shadowOpacity: 0.3,
-        shadowRadius: 5
+        shadowOpacity: 0.25,
+        shadowRadius: 7
     },
     label: {
         fontSize: 18,
@@ -141,3 +147,10 @@ const styles = StyleSheet.create({
         color: 'rgba(255,255,255,0.55)'
     }
 })
+
+
+/* GRADIENTS 
+
+Light and summery: #4eaaeb, #f760ab, fdbb2d
+
+*/

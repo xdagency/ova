@@ -117,7 +117,8 @@ export default class App extends React.Component {
                 user_a_score: this.state.user_a_score,
                 user_b_score: this.state.user_b_score,
                 letterCount: this.state.letterCount,
-                _onWordSubmit: this._onWordSubmit
+                _onWordSubmit: this._onWordSubmit,
+                displayOverlay: 'none'
             });
 
           }) // end setState
@@ -178,7 +179,8 @@ export default class App extends React.Component {
                 user_a_score: this.state.user_a_score, 
                 user_b_score: this.state.user_b_score,
                 letterCount: this.state.letterCount,
-                winner: data.winner
+                winner: data.winner,
+                displayOverlay: 'none'
             } });
         })
     })
@@ -265,7 +267,8 @@ export default class App extends React.Component {
               user_a_score: data.user_a.score,
               user_b_score: data.user_b.score,
               letterCount: this.state.letterCount,
-              _onWordSubmit: this._onWordSubmit
+              _onWordSubmit: this._onWordSubmit,
+              displayOverlay: 'none'
             });
 
           })
@@ -331,6 +334,7 @@ export default class App extends React.Component {
           // Otherwise set the word as their word for the game
           } else {
               // console.log(response);
+              Actions.refresh({ key: 'word', word: w, displayOverlay: 'flex' });
               Alert.alert('Valid word', 'Your word will be: ' + w);
 
               // Convert game ID to upper case to avoid matching errors on server

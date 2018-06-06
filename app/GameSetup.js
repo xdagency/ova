@@ -1,4 +1,4 @@
-import Expo from 'expo';
+import { Expo, LinearGradient } from 'expo';
 import React from 'react';
 import { StyleSheet, Text, View, TextInput, Alert, Button, StatusBar } from 'react-native';
 import { Actions } from 'react-native-router-flux';
@@ -45,7 +45,8 @@ export default class GameSetup extends React.Component {
             user_a_score: 0, 
             user_b_score: 0, 
             letterCount: this.props.letterCount,
-            _onWordSubmit: this.props._onWordSubmit
+            _onWordSubmit: this.props._onWordSubmit,
+            displayOverlay: this.props.displayOverlay
         });
     }
 
@@ -58,6 +59,10 @@ export default class GameSetup extends React.Component {
 
             return (
                 <View style={styles.container}>
+
+                    <LinearGradient colors={['#ec8f3f', 'rgba(236,143,63,0)']} start={[1,0]} end={[0,0]}
+                    style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }} />
+
                     <View style={styles.block}>
                         <Text style={[styles.p, styles.p__space]}>Hey, {this.props.user_a_name}</Text>
                     </View>
@@ -77,9 +82,14 @@ export default class GameSetup extends React.Component {
 
             return (
                 <View style={styles.container}>
+
+                    <LinearGradient colors={['#ec8f3f', 'rgba(236,143,63,0)']} start={[1,0]} end={[0,0]}
+                    style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }} />
+
                     <View style={styles.block}>
                         <Text style={[styles.p, styles.p__space]}>Hey, {this.props.user_b_name}</Text>
                     </View>
+
                     <View style={[styles.block, styles.block__top]}>
                         <View style={styles.form}>
                             <Text style={styles.label}>Join Game</Text>
@@ -95,6 +105,7 @@ export default class GameSetup extends React.Component {
                                 placeholder="Enter a game ID" />
                         </View>
                     </View>
+                    
                 </View>
             )
 
@@ -126,6 +137,7 @@ const styles = StyleSheet.create({
     span: {
         padding: 4,
         backgroundColor: '#d1432e',
+        opacity: 0.75,
         marginTop: 4,
         marginBottom: 21,
         shadowOffset: { width: 0, height: 16 },

@@ -1,4 +1,4 @@
-import Expo from 'expo';
+import { Expo, LinearGradient } from 'expo';
 import React from 'react';
 import { StyleSheet, Text, View, TextInput, Alert, Button, StatusBar } from 'react-native';
 import CountdownCircle from 'react-native-countdown-circle';
@@ -31,6 +31,12 @@ export default class Home extends React.Component {
 
         return (
             <View style={this.state.containerClasses}>
+
+                <LinearGradient colors={['#6a018d', 'rgba(106,1,141,0)']} start={[1,1]} end={[0.15,0.15]}
+                style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }} />
+
+                <LinearGradient colors={['#5679f7', 'rgba(86,121,247,0)']} start={[1,0]} end={[0.2,0.88]}
+                style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }} />
 
                 {/* Top block, game state */}
                 <View style={styles.block}>
@@ -98,7 +104,8 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         flexDirection: 'column',
-        backgroundColor: '#7e1c54'
+        // backgroundColor: '#7e1c54',
+        backgroundColor: '#44caa2'
     },
     block: {
         flex: 1,
@@ -133,7 +140,8 @@ const styles = StyleSheet.create({
 
     round: {
         padding: 6,
-        backgroundColor: '#c9c9c9'
+        backgroundColor: '#c9c9c9',
+        opacity: 0.7
     },
     round__text: {
         fontSize: 12,
@@ -143,7 +151,8 @@ const styles = StyleSheet.create({
     scores: {
         paddingTop: 16, paddingBottom: 32, paddingLeft: 32, paddingRight: 32,
         backgroundColor: '#dddddd',
-        flexDirection: 'row'
+        flexDirection: 'row',
+        opacity: 0.7
     },
     scoreDetails: {
         flex: 1,
@@ -187,7 +196,7 @@ const styles = StyleSheet.create({
     },
     p__small: {
         fontSize: 12,
-        color: '#AAAAAA',
+        color: 'rgba(255,255,255,0.7)',
         lineHeight: 14
     },
     p__spread: {

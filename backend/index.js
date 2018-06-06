@@ -46,11 +46,11 @@ let dict = new Dictionary(app_id, app_key);
 // 8 arrays for 7 rounds, round 0 array being null
 let words = [
     [null],
-    ['blue', 'game', 'moon', 'raid', 'food', 'stop', 'draw', 'slip', 'fork', 'rake', 'pull', 'push', 'bend'], // round 1
-    ['mouth', 'bread', 'speed', 'float', 'blame', 'melon', 'total', 'break', 'smoke', 'alter', 'trait', 'drink', 'glass'], // round 2
-    ['flower', 'figure', 'school', 'spirit', 'daring', 'useful', 'sprain', 'crunch', 'salmon', 'shrimp', 'savage', 'boiled', 'potato'], // round 3
-    ['useless', 'blaming', 'sparrow', 'octopus', 'freedom', 'carnage', 'achieve', 'approve', 'charted', 'fulfill', 'handout', 'manager', 'scooter'], // round 4???
-    ['asterisk', 'comedian', 'footnote', 'identify', 'imperial', 'painting', 'scissors', 'friendly', 'standoff', 'threaten', 'unlocked', 'violence', 'zucchini']
+    ['Blue', 'Game', 'Moon', 'Raid', 'Food', 'Stop', 'Draw', 'Slip', 'Fork', 'Rake', 'Pull', 'Push', 'Bend'], // round 1
+    ['Mouth', 'Bread', 'Speed', 'Float', 'Blame', 'Melon', 'Total', 'Break', 'Smoke', 'Alter', 'Trait', 'Drink', 'Glass'], // round 2
+    ['Flower', 'Figure', 'School', 'Spirit', 'Daring', 'Useful', 'Sprain', 'Crunch', 'Salmon', 'Shrimp', 'Savage', 'Boiled', 'Potato'], // round 3
+    ['Useless', 'Outward', 'Sparrow', 'Octopus', 'Freedom', 'Carnage', 'Achieve', 'Approve', 'Charted', 'Faction', 'Handout', 'Manager', 'Scooter'], // round 4???
+    ['Asterisk', 'Comedian', 'Footnote', 'Identify', 'Imperial', 'Painting', 'Scissors', 'Friendly', 'Standoff', 'Threaten', 'Unlocked', 'Violence', 'Zucchini']
 ];
 
 
@@ -77,10 +77,19 @@ function Game(gameStatus, gameID, gameRound, user_a, user_b) {
 
 
 //////////////////////////////
+// GET ROUTE - /
+//////////////////////////////
+
+app.get('/', (req, res) => {
+
+});
+
+
+//////////////////////////////
 // GET ROUTE - /words
 //////////////////////////////
 
-app.get('/word' , (req, res) => {
+app.get('/word', (req, res) => {
 
     // Send the user a random word from pre-made array
     res.json(words[req.query.round][random()]);
