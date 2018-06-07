@@ -82,6 +82,9 @@ function Game(gameStatus, gameID, gameRound, user_a, user_b) {
 
 app.get('/', (req, res) => {
 
+    // Send a homepage
+    res.sendFile(__dirname + '/public/index.html');
+
 });
 
 
@@ -173,7 +176,7 @@ io.on('connection', function(socket) {
 
         // Log the game that was just created 
         // console.log('Game created - All games: \n', games);
-        console.log('Game created: \n', games[currGameIndex]);
+        console.log('\n===== Game created ===== \n', games[currGameIndex]);
         // console.log('Game Index', currGameIndex);
 
     });
@@ -185,25 +188,16 @@ io.on('connection', function(socket) {
 
     socket.on('join-game', (data) => {
 
-        console.log('data', data);
+        console.log('data:', data);
 
         // Find the correct game id
         let theGame = games.find((elem) => {
             return elem = elem.gameID === data.game_id;
-        })
-
-
-        // console.log('--------------------------');
-        // console.log('tried to find game with gameID', data.game_id);
-        // console.log('games look like'); console.log(games);
-        // console.log('--------------------------');
-        // // Log what we found
-        // console.log('join game id', theGame.gameID);
-
+        });
 
         // Catch a socket trying to hit 'join-game' without a gameID
         if (!data.game_id) {
-            console.log('Phantom', socket.id);
+            console.log('\n===== Phantom ===== \n', socket.id);
             return;
         }
         
@@ -232,7 +226,7 @@ io.on('connection', function(socket) {
 
         }
 
-        console.log('player B joined', theGame);
+        console.log('\n===== Player joined ===== \n', 'Game:', theGame.gameID, '\nName:', data.nickname);
         // console.log('Player B joined', games[foundGameIndex_join]);
 
     });
@@ -268,7 +262,7 @@ io.on('connection', function(socket) {
             theGame.user_b.s_word = s_word;
         }
 
-        console.log('word added:', theGame);
+        console.log('\n===== Word added ===== \n', theGame);
 
         // Check if both words have been submitted
         // If true, game can start
@@ -298,7 +292,8 @@ io.on('connection', function(socket) {
             return elem = elem.gameID === data.game_id;
         })
 
-        console.log('Guess was made to gameIndex', theGameIndex);
+        // console.log('Guess was made to gameIndex', theGameIndex);
+        console.log('\nuser', data.user, 'guessed:', data.guess);
 
         // check if it's correct
         // User A wins
@@ -334,7 +329,7 @@ io.on('connection', function(socket) {
 
     socket.on('disconnect', function() {
         // Log when a user has lost connection with their socket
-        console.log('Client disconnected.', socket.id);
+        console.log('Socket disconnected.', socket.id);
     });
 
 });
@@ -374,7 +369,7 @@ function updateGameState(u, id, i) {
         });
     }
 
-    console.log('game status:', games[i]);
+    console.log('\n===== Game updated ===== \n', 'Game', games[i].gameID, '\nRound', games[i].gameRound, '\nLetter count', games[i].letterCount);
 
 }
 

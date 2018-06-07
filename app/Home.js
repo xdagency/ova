@@ -23,10 +23,10 @@ export default class Home extends React.Component {
         return (
             <View style={styles.container}>
 
-                <LinearGradient colors={['#f760ab', 'rgba(240,210,110, 0)']} start={[1,1]} end={[0.15,0.15]}
+                <LinearGradient colors={['#f760ab', 'rgba(247,96,171,0)']} start={[1,1]} end={[0.15,0.15]}
                 style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }} />
 
-                <LinearGradient colors={['#fdbb2d', 'rgba(253, 187, 45, 0)']} start={[1,0]} end={[0.2,0.88]}
+                <LinearGradient colors={['#fdbb2d', 'rgba(253,187,45,0)']} start={[1,0]} end={[0.2,0.88]}
                 style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }} />
 
                 {/* Top block, app title */}
@@ -48,8 +48,8 @@ export default class Home extends React.Component {
                             placeholder="Enter a username" />
                     </View>
                     <View style={styles.form}>
-                        <Button onPress={ () => { this.props._onJoinGame(this.state.username) }} title="Join Game" color="#f9f9f9" />
                         <Button onPress={ () => { this.props._onCreateGame(this.state.username) }} title="Create New Game" color="#f9f9f9" />
+                        <Button onPress={ () => { this.props._onJoinGame(this.state.username) }} title="Join Game" color="#f9f9f9" />
                     </View>
                 </View>
 

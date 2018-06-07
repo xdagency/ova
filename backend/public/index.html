@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Ova App</title>
+
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.13/css/all.css" integrity="sha384-DNOHZ68U8hZfKXOrtjWvjxusGo9WQnrNx2sqG0tfsghAvtVlRW3tvkXWZh58N9jp" crossorigin="anonymous">
+
+    <style>
+        
+        body {
+            height: 100vh;
+            padding: 0;
+            margin: 0;
+            background-repeat: no-repeat;
+            background-color: rgba(34,193,195,1);
+            background: linear-gradient(88deg, rgba(34,193,195,1), rgba(34,193,195,0) 70%),
+                        linear-gradient(-300deg, rgba(247,96,171,1), rgba(247,96,171,0)),
+                        linear-gradient(200deg, rgba(253,187,45,1), rgba(253,187,45,0));
+        }
+
+        h1 {
+            font: normal 72px/100% "Didot", serif;
+            color: #f0f0f0;
+            padding: 0 0 16px;
+            margin: 0;
+            text-align: center;
+            text-shadow: 0px 12px 21px rgba(0,0,0,0.24);
+        }
+        
+        p {
+            font: normal 18px/144% "Noto Sans", sans-serif;
+            color: #f9f9f9;
+            padding: 0 0 8px;
+            margin: 0;
+            text-align: center;
+        }
+
+        .content {
+            position: absolute;
+            width: 760px;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .grid {
+            padding: 16px 0 0;
+            display: grid;
+            grid-gap: 16px;
+            grid-template-columns: repeat(3, 1fr);
+        }
+
+        .grid__item {
+            border: 1px solid rgba(255,255,255,0.28);
+            padding: 16px;
+            border-radius: 5px;
+            background: rgba(0,0,0,0.05);
+        }
+
+        .grid__item p {
+            font-size: 16px;
+            display: inline-block;
+            width: 60%;
+            text-align: left;
+            vertical-align: middle;
+            padding: 0; margin: 0;
+        }
+
+        .grid__item i {
+            display: inline-block;
+            vertical-align: middle;
+            width: 33%;
+            font-size: 36px;
+            color: white;
+        }
+
+        figure {
+            width: 88px;
+            margin: 0 auto 16px;
+        }
+
+        figure img {
+            display: block;
+            width: 100%;
+        }
+
+    </style>
+
+</head>
+<body>
+    
+    <div class="content">
+
+        <h1>Ova</h1>
+        <p>A word game for iOS</p>
+
+        <div class="grid">
+            <div class="grid__item">
+                <i class="fas fa-user-plus"></i>
+                <p>Create or join a game</p>
+            </div>
+            <div class="grid__item">
+                <i class="fas fa-font"></i>
+                <p>Choose a word to be scrambled</p>
+            </div>
+            <div class="grid__item">
+                <i class="far fa-comments"></i>
+                <p>Guess your opponents word</p>
+            </div>
+        </div>
+
+    </div>
+
+</body>
+</html>

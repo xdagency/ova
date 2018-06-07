@@ -72,11 +72,6 @@ export default class Word extends React.Component {
                     ) : (
                         null
                     )}
-                    {/* 
-                    <Text style={styles.p}>Your word: {this.state.word}</Text>
-                    <Text style={styles.p__small}>Player 1: {this.props.user_a_name}</Text>
-                    <Text style={styles.p__small}>Player 2: {this.props.user_b_name}</Text>
-                     */}
                 </View>
 
                 {/* Bottom block, word selection */}
@@ -87,7 +82,7 @@ export default class Word extends React.Component {
                             style={styles.input} 
                             keyboardType="default" 
                             maxLength={this.props.letterCount} 
-                            ref={(input) => { this.input = input }} 
+                            ref={(w_input) => { this.input = w_input }} 
                             onChangeText={(text) => this.setState({ word: text })}  
                             placeholder={'Enter a ' + this.props.letterCount + '-letter word'} 
                             onSubmitEditing={ () => this.props._onWordSubmit(this.props.game_id, this.state.word) } 

@@ -13,7 +13,7 @@ window.navigator.userAgent = 'react-native';
 
 // import io from 'socket.io-client/dist/socket.io';
 import io from 'socket.io-client';
-const socket = io('http://192.168.0.14:3001', {
+const socket = io('http://10.32.5.219:3001', {
   transports: ['websocket'],
 })
 
@@ -26,8 +26,6 @@ export default class App extends React.Component {
     this.state = {
 
       // game state
-      playerReady: false,
-      opponentReady: false,
       round: 1,
       letterCount: 4,
       user_a_word: '',
@@ -44,9 +42,7 @@ export default class App extends React.Component {
       user_b_score: 0,
 
       // sockets
-      ip: 'http://192.168.0.14:3001',
-      playerConnected: false,
-      opponentConnected: false,
+      ip: 'http://10.32.5.219:3001',
 
       // for styling, etc
       myClasses: null
@@ -196,7 +192,8 @@ export default class App extends React.Component {
             user_a_name: this.state.user_a_name,
             user_b_name: this.state.user_b_name,
             user_a_score: data.game.user_a.score,
-            user_b_score: data.game.user_b.score
+            user_b_score: data.game.user_b.score,
+            _onNewGame: this._onNewGame
         })
     })
 
@@ -218,7 +215,8 @@ export default class App extends React.Component {
       // So we set user b details
       this.setState({
           user_b_name: u,
-          is_user_b: true
+          is_user_b: true,
+          is_user_a: false
       }, () => {
         Actions.setup({
             gameType: 'join', 
@@ -246,7 +244,8 @@ export default class App extends React.Component {
 
       this.setState({
         user_a_name: u,
-        is_user_a: true
+        is_user_a: true,
+        is_user_b: false
       }, () => {
           
           // Send an emit to server to create a game object in 'games' array
@@ -283,17 +282,18 @@ export default class App extends React.Component {
 
   _onGameIdSubmit = (id, nickname) => {
 
-    this.setState({
-        user_b_name: nickname
-    }, () => {
-
-        // Set state call back
+    // this.setState({
+    //     user_b_name: nickname
+    // }, () => {
         
         let _id = id.toUpperCase();
-        // Emit a join game
-        socket.emit('join-game', { game_id: _id, nickname: nickname });
 
-    }); // end setState
+        console.log('_onGameIdSubmit hit by', nickname);
+
+        // Emit a join game
+        socket.emit('join-game', { game_id: _id, nickname: this.state.user_b_name });
+
+    // }); // end setState
 
   }
 
@@ -333,9 +333,10 @@ export default class App extends React.Component {
           
           // Otherwise set the word as their word for the game
           } else {
-              // console.log(response);
+              // Word is valid so show the "locked in" overlay 
               Actions.refresh({ key: 'word', word: w, displayOverlay: 'flex' });
-              Alert.alert('Valid word', 'Your word will be: ' + w);
+              // Pop up an alert
+              // Alert.alert('Valid word', 'Your word will be: ' + w);
 
               // Convert game ID to upper case to avoid matching errors on server
               let _id = id.toUpperCase();
@@ -369,6 +370,33 @@ export default class App extends React.Component {
   }
 
 
+  //////////////////////////////
+  // WORD GUESS
+  //////////////////////////////
+
+  _onNewGame = () => {
+
+    // When user clicks new game just clear out all old state data
+    this.setState({
+        letterCount: 4,
+        user_a_name: '',
+        user_a_score: 0,
+        user_b_name: '',
+        user_b_score: 0,
+        is_user_a: false,
+        is_user_b: false
+    }, () => {
+      Actions.home({
+        _onUsernameSubmit: this._onUsernameSubmit,
+        _onJoinGame: this._onJoinGame,
+        _onCreateGame: this._onCreateGame,
+        letterCount: this.state.letterCount
+      });
+    })
+
+  }
+
+
   
   ///// RENDER /////
 
@@ -385,24 +413,21 @@ export default class App extends React.Component {
               _onUsernameSubmit={this._onUsernameSubmit} 
               _onJoinGame={this._onJoinGame} 
               _onCreateGame={this._onCreateGame} 
-              playerName={this.state.playerName} 
-              opponentName={this.state.opponentName} 
-              playerScore={this.state.playerScore} 
-              playerConnected={this.state.playerConnected} 
               opponentScore={this.state.opponentScore} />
 
           <Scene key="word" headerMode="none" hideNavBar="true" component={Word} 
               _onWordSubmit={this._onWordSubmit} 
               round={this.state.round} />
 
-          <Scene key="setup" headerMode="none" hideNavBar="true" component={GameSetup} 
+          <Scene key="setup" headerMode="float" backTitle="Home" component={GameSetup} 
               _onGameIdSubmit={this._onGameIdSubmit} 
               playerName={this.state.playerName} 
               opponentName={this.state.opponentName} />
 
           <Scene key="play" headerMode="none" hideNavBar="true" component={Play} />
 
-          <Scene key="end" headerMode="none" hideNavBar="true" component={End} />
+          <Scene key="end" headerMode="none" hideNavBar="true" component={End} _onNewGame={this._onNewGame} 
+          user_a_name="Adam" user_b_name="Brad" user_a_score="3" user_b_score="1" />
 
         </Stack>
       </Router>

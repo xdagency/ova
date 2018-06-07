@@ -21,7 +21,7 @@ export default class GameSetup extends React.Component {
     componentDidMount() {
         
         // make status bar white
-        StatusBar.setBarStyle('light-content', true);
+        StatusBar.setBarStyle('dark-content', true);
 
         if (this.props.gameType === 'join') {
             this.input.focus();
