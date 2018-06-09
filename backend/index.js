@@ -49,7 +49,7 @@ let words = [
     ['Blue', 'Game', 'Moon', 'Raid', 'Food', 'Stop', 'Draw', 'Slip', 'Fork', 'Rake', 'Pull', 'Push', 'Bend'], // round 1
     ['Mouth', 'Bread', 'Speed', 'Float', 'Blame', 'Melon', 'Total', 'Break', 'Smoke', 'Alter', 'Trait', 'Drink', 'Glass'], // round 2
     ['Flower', 'Figure', 'School', 'Spirit', 'Daring', 'Useful', 'Sprain', 'Crunch', 'Salmon', 'Shrimp', 'Savage', 'Boiled', 'Potato'], // round 3
-    ['Useless', 'Outward', 'Sparrow', 'Octopus', 'Freedom', 'Carnage', 'Achieve', 'Approve', 'Charted', 'Faction', 'Handout', 'Manager', 'Scooter'], // round 4???
+    ['Useless', 'Outward', 'Sparrow', 'Octopus', 'Freedom', 'Carnage', 'Achieve', 'Approve', 'Dictate', 'Faction', 'Handout', 'Manager', 'Scooter'], // round 4???
     ['Asterisk', 'Comedian', 'Footnote', 'Identify', 'Imperial', 'Painting', 'Scissors', 'Friendly', 'Standoff', 'Threaten', 'Unlocked', 'Violence', 'Zucchini']
 ];
 
@@ -172,7 +172,12 @@ io.on('connection', function(socket) {
         });
 
         // Send back the game ID to user A and some initial game values
-        socket.emit('game-info', { game_id: currGameID, gameRound: 1, user_a: { score: 0 }, user_b: { score: 0 } });
+        socket.emit('game-info', { 
+            game_id: currGameID, 
+            gameRound: 1, 
+            user_a: { score: 0 }, 
+            user_b: { score: 0 } 
+        });
 
         // Log the game that was just created 
         // console.log('Game created - All games: \n', games);

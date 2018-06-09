@@ -57,6 +57,7 @@ export default class Home extends React.Component {
                             maxLength={this.props.letterCount} 
                             ref={(input) => { this.input = input }} 
                             onChangeText={(text) => this.setState({ guess: text })}  
+                            autoCorrect={false} 
                             placeholder={'Guess a ' + this.props.letterCount + '-letter word'} 
                             onSubmitEditing={ () => this.props._onGuessSubmit(this.props.game_id, this.state.guess, this.state.user) } 
                             returnKeyType='done' />

@@ -41,6 +41,7 @@ export default class Home extends React.Component {
                         <TextInput 
                             style={styles.input} 
                             keyboardType="default" 
+                            ref={(h_input) => { this.input = h_input }} 
                             maxLength={10} 
                             returnKeyType="done" 
                             onChangeText={ (text) => this.setState({ username: text }) } 

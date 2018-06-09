@@ -5,6 +5,7 @@ import { Router, Stack, Scene, Actions } from 'react-native-router-flux';
 import Home from './Home';
 import Word from './Word';
 import GameSetup from './GameSetup';
+import GameJoin from './GameJoin';
 import Play from './Play';
 import End from './End';
 
@@ -32,6 +33,7 @@ export default class App extends React.Component {
       user_b_word: '',
 
       // player names & state
+      username: '',
       user_a_name: '',
       user_b_name: '',
       is_user_a: false,
@@ -152,8 +154,7 @@ export default class App extends React.Component {
     // When a player guesses correctly
     socket.on('round-end', (data) => {
 
-        console.log('winner is', data.winner);
-        console.log('letter count now', this.state.letterCount);
+        console.log('winner is', data.winner, '- letter count now', data.letterCount);
 
         // Update state with new round #
         this.setState({
@@ -162,13 +163,6 @@ export default class App extends React.Component {
             user_a_score: data.user_a_score,
             user_b_score: data.user_b_score
         }, () => {
-            // Actions.refresh({ key: 'play',
-            //     round: this.state.round, 
-            //     user_a_score: this.state.user_a_score, 
-            //     user_b_score: this.state.user_b_score,
-            //     letterCount: this.state.letterCount,
-            //     winner: data.winner
-            // });
             Actions.pop({ refresh: { 
                 round: this.state.round, 
                 letterCount: this.state.letterCount,
@@ -218,7 +212,7 @@ export default class App extends React.Component {
           is_user_b: true,
           is_user_a: false
       }, () => {
-        Actions.setup({
+        Actions.join({
             gameType: 'join', 
             ip: this.state.ip,
             user_b_name: this.state.user_b_name, 
@@ -245,7 +239,8 @@ export default class App extends React.Component {
       this.setState({
         user_a_name: u,
         is_user_a: true,
-        is_user_b: false
+        is_user_b: false,
+        username: u
       }, () => {
           
           // Send an emit to server to create a game object in 'games' array
@@ -263,8 +258,8 @@ export default class App extends React.Component {
               is_user_a: this.state.is_user_a,
               game_id: data.game_id, 
               round: data.gameRound, 
-              user_a_score: data.user_a.score,
-              user_b_score: data.user_b.score,
+              user_a_score: this.state.user_a_score,
+              user_b_score: this.state.user_b_score,
               letterCount: this.state.letterCount,
               _onWordSubmit: this._onWordSubmit,
               displayOverlay: 'none'
@@ -280,20 +275,20 @@ export default class App extends React.Component {
   // SUBMIT GAME ID (i.e. Joing a Game)
   //////////////////////////////
 
-  _onGameIdSubmit = (id, nickname) => {
+  _onGameIdSubmit = (id, u) => {
 
-    // this.setState({
-    //     user_b_name: nickname
-    // }, () => {
+    this.setState({
+        username: u
+    }, () => {
         
         let _id = id.toUpperCase();
 
-        console.log('_onGameIdSubmit hit by', nickname);
+        console.log('_onGameIdSubmit hit by', u);
 
         // Emit a join game
         socket.emit('join-game', { game_id: _id, nickname: this.state.user_b_name });
 
-    // }); // end setState
+    }); // end setState
 
   }
 
@@ -378,6 +373,7 @@ export default class App extends React.Component {
 
     // When user clicks new game just clear out all old state data
     this.setState({
+        round: 1,
         letterCount: 4,
         user_a_name: '',
         user_a_score: 0,
@@ -390,7 +386,8 @@ export default class App extends React.Component {
         _onUsernameSubmit: this._onUsernameSubmit,
         _onJoinGame: this._onJoinGame,
         _onCreateGame: this._onCreateGame,
-        letterCount: this.state.letterCount
+        letterCount: this.state.letterCount,
+        username: this.state.username
       });
     })
 
@@ -419,10 +416,10 @@ export default class App extends React.Component {
               _onWordSubmit={this._onWordSubmit} 
               round={this.state.round} />
 
-          <Scene key="setup" headerMode="float" backTitle="Home" component={GameSetup} 
-              _onGameIdSubmit={this._onGameIdSubmit} 
-              playerName={this.state.playerName} 
-              opponentName={this.state.opponentName} />
+          <Scene key="setup" headerMode="float" backTitle="Home" component={GameSetup} />
+
+          <Scene key="join" headerMode="float" backTitle="Home" component={GameJoin} 
+              _onGameIdSubmit={this._onGameIdSubmit} />
 
           <Scene key="play" headerMode="none" hideNavBar="true" component={Play} />
 

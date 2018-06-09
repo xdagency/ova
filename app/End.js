@@ -109,7 +109,7 @@ const styles = StyleSheet.create({
     heading: {
         color: '#f9f9f9',
         fontFamily: 'Didot',
-        // fontWeight: 'bold',
+        fontWeight: 'bold',
         fontSize: 44,
         shadowOffset: { width: 0, height: 12 },
         shadowColor: '#000000',
