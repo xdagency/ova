@@ -14,7 +14,7 @@ window.navigator.userAgent = 'react-native';
 
 // import io from 'socket.io-client/dist/socket.io';
 import io from 'socket.io-client';
-const socket = io('http://192.168.0.11:3001', {
+const socket = io('http://192.168.0.14:3001', {
   transports: ['websocket'],
 })
 
@@ -44,7 +44,7 @@ export default class App extends React.Component {
       user_b_score: 0,
 
       // sockets
-      ip: 'http://192.168.0.11:3001',
+      ip: 'http://192.168.0.14:3001',
 
       // for styling, etc
       myClasses: null
